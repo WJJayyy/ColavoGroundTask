@@ -10,11 +10,10 @@
     "target": "ES6",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./src",
     "incremental": true,
     "resolveJsonModule": true,
     "types": ["node", "jest", "dayjs", "dayjs/plugin/utc", "dayjs-recur"],
     "typeRoots": ["./types", "./node_modules/@types"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["colavo/src/**/*.ts"]
 }

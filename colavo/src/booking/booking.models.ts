@@ -8,6 +8,7 @@ export interface DayTimetable {
 export interface Timeslot {
     begin_at: number // Unixstamp seconds
     end_at: number // Unixstamp seconds
+    is_reserved?: boolean;
 }
 
 export type ResponseBody = DayTimetable[];

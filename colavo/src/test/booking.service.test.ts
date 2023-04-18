@@ -23,7 +23,7 @@ describe('BookingService', () => {
             expect(Array.isArray(result)).toBe(true);
 
             const dayTimetable = result[0];
-            expect(dayTimetable.start_of_day).toBeDefined();
+            expect(dayTimetable?.start_of_day).toBeDefined();
             expect(dayTimetable.day_modifier).toBeDefined();
             expect(dayTimetable.is_day_off).toBeDefined();
             expect(dayTimetable.timeslots).toBeDefined();
