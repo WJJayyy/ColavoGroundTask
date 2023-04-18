@@ -1,0 +1,32 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "start:dev": "tsc-watch --onSuccess \"node dist/app.js\"",
+    "prestart": "npm run build",
+    "start": "node dist/app.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
+    "@types/dayjs-recur": "^1.0.0",
+    "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^15.14.9",
+    "babel-jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "prettier": "^2.2.1",
+    "ts-jest": "^29.1.0",
+    "tsc": "^2.0.3",
+    "tsc-watch": "^4.2.9"
+  },
+  "dependencies": {
+    "dayjs-ext": "^2.2.0",
+    "express": "^4.18.2",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
+    "timezone-enum": "^1.0.3",
+    "ts-node": "^10.9.1",
+    "dayjs": "1.10.4"
+  }
+}
