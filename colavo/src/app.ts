@@ -1,12 +1,21 @@
-import * as express from 'express';
+import express, { Request, Response } from 'express';
+import bookingRouter from './booking/booking.route';
 
-const app: express.Express = express();
-const port: number = 8000;
+const app = express();
+const port = 8000;
 
-app.get('/', (req: express.Request, res: express.Response) => {
+// Middleware
+app.use(express.json());
+
+// Routes
+app.use('/getTimeSlots', bookingRouter);
+
+// Default Route
+app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!');
 });
 
+// Start the server
 app.listen(port, () => {
-    console.log(`app listening at http://localhost:${port}!`);
+    console.log(`Server is listening on http://localhost:${port}`);
 });

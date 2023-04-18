@@ -1,15 +1,9 @@
-import { BookingService } from '../booking/booking.service';
+import { getTimeSlots } from '../booking/booking.service';
 
 describe('BookingService', () => {
-    let bookingService: BookingService;
-
-    beforeEach(() => {
-        bookingService = new BookingService();
-    });
-
     describe('getTimeSlots', () => {
-        it('should return a valid DayTimetable array for valid input', () => {
-            const result = bookingService.getTimeSlots(
+        it('should return a valid DayTimetable array for valid input', async () => {
+            const result = await getTimeSlots(
                 '20210509',
                 'Asia/Seoul',
                 3600,
@@ -17,6 +11,8 @@ describe('BookingService', () => {
                 1800,
                 true,
                 false,
+                [], // Add empty array for events
+                []  // Add empty array for workhours
             );
 
             expect(result).toBeDefined();
