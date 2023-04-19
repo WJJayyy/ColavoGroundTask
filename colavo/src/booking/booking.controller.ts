@@ -28,9 +28,13 @@ export async function getTimeSlots(req: Request, res: Response): Promise<void> {
         );
 
         res.status(200).json(result);
-    } catch (err: any) {
-        console.error(err);
-        res.status(500).send(err.message);
+    } catch (err) {
+        if (err instanceof Error) {
+            console.error(err);
+            res.status(500).send(err.message);
+        } else {
+            res.status(500).send("An unknown error occurred.");
+        }
     }
 }
 

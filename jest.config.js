@@ -5,4 +5,5 @@ module.exports = {
   testMatch: ['**/src/**/*.test.(ts|js)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverage: true,
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
 };

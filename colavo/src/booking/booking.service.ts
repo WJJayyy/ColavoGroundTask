@@ -6,7 +6,7 @@ import * as workhours from '../../workhours.json';
 export type Events = Event[];
 export type Workhours = Workhour[];
 
-interface Event {
+export interface Event {
     begin_at: number;
     end_at: number;
     created_at: number;
@@ -63,8 +63,12 @@ export async function getTimeSlots(
             slot_start += timeslot_interval
         ) {
             const slot_end = slot_start + service_duration;
+
+            const local_slot_start = moment.tz(slot_start * 1000, timezone_identifier).unix();
+            const local_slot_end = moment.tz(slot_end * 1000, timezone_identifier).unix();
+
             const overlappingEvent = events.find(
-                event => event.begin_at < slot_end && event.end_at > slot_start
+                event => event.begin_at < local_slot_end && event.end_at > local_slot_start
             );
 
             if (!is_ignore_schedule && overlappingEvent) {
