@@ -3,8 +3,8 @@ import * as moment from 'moment-timezone';
 import * as events from '../../events.json';
 import * as workhours from '../../workhours.json';
 
-export type Events = Event[]; // 'export' 추가
-export type Workhours = Workhour[]; // 'export' 추가
+export type Events = Event[];
+export type Workhours = Workhour[];
 
 interface Event {
     begin_at: number;

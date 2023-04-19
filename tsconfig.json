@@ -3,17 +3,21 @@
     "strict": true,
     "module": "commonjs",
     "declaration": true,
+    "esModuleInterop": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES6",
-    "sourceMap": true,
-    "outDir": "./dist",
+    "sourceMap": false,
+    "rootDir": "./colavo",
+    "outDir": "./dist/colavo",
+    "baseUrl": "./colavo/src",
     "incremental": true,
     "resolveJsonModule": true,
     "types": ["node", "jest", "dayjs", "dayjs/plugin/utc", "dayjs-recur"],
     "typeRoots": ["./types", "./node_modules/@types"]
   },
-  "include": ["colavo/src/**/*.ts"]
+  "include": ["colavo/src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

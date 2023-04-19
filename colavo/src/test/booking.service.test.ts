@@ -11,8 +11,8 @@ describe('BookingService', () => {
                 1800,
                 true,
                 false,
-                [], // Add empty array for events
-                []  // Add empty array for workhours
+                [],
+                []
             );
 
             expect(result).toBeDefined();
