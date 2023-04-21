@@ -2,6 +2,7 @@ import { DayTimetable, Timeslot } from './booking.models';
 import * as moment from 'moment-timezone';
 import * as events from '../../events.json';
 import * as workhours from '../../workhours.json';
+import dayjs from 'dayjs';
 
 export type Events = Event[];
 export type Workhours = Workhour[];
@@ -32,7 +33,7 @@ export async function getTimeSlots(
     events: Events,
     workhours: Workhours
 ): Promise<DayTimetable[]> {
-    const startDay = moment.tz(start_day_identifier, "YYYYMMDD", timezone_identifier);
+    const startDay = dayjs.tz(start_day_identifier, "YYYYMMDD", timezone_identifier);
     const dayTimetables: DayTimetable[] = [];
 
     for (let i = 0; i < days; i++) {
@@ -40,7 +41,7 @@ export async function getTimeSlots(
         const start_of_day = currentDay.clone().startOf('day').unix();
         const day_modifier = i;
 
-        const weekday = currentDay.isoWeekday();
+        const weekday = currentDay.day() === 0 ? 6 : currentDay.day() - 1;
         const workhour = workhours.find(wh => wh.weekday === weekday);
 
         if (!is_ignore_workhour && workhour?.is_day_off) {
@@ -67,8 +68,9 @@ export async function getTimeSlots(
             const local_slot_start = moment.tz(slot_start * 1000, timezone_identifier).unix();
             const local_slot_end = moment.tz(slot_end * 1000, timezone_identifier).unix();
 
+
             const overlappingEvent = events.find(
-                event => event.begin_at < local_slot_end && event.end_at > local_slot_start
+                event => event.begin_at < local_slot_end && event.end_at > slot_start
             );
 
             if (!is_ignore_schedule && overlappingEvent) {
@@ -76,10 +78,11 @@ export async function getTimeSlots(
             }
 
             timeslots.push({
-                begin_at: slot_start,
-                end_at: slot_end,
+                begin_at: local_slot_start,
+                end_at: local_slot_end,
             });
         }
+
 
         dayTimetables.push({
             start_of_day,
@@ -91,3 +94,4 @@ export async function getTimeSlots(
 
     return dayTimetables;
 }
+

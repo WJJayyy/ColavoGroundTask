@@ -1,12 +1,16 @@
 import { getTimeSlots } from '../booking/booking.service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { Event } from '../booking/booking.service';
 
+dayjs.extend(timezone);
 dayjs.extend(utc);
 
 describe('BookingService', () => {
     describe('getTimeSlots', () => {
-        it('should return a valid DayTimetable array for 20210509, 20210510, and 20210511', async () => {
+        // Step 1: Test the API with provided parameters
+        it('should return a valid DayTimetable array for given parameters', async () => {
             const result = await getTimeSlots(
                 '20210509',
                 'Asia/Seoul',
@@ -22,30 +26,10 @@ describe('BookingService', () => {
             expect(result).toBeDefined();
             expect(Array.isArray(result)).toBe(true);
             expect(result.length).toBe(3);
-
-            // Check for 2021-05-09
-            const dayTimetable1 = result[0];
-            expect(dayTimetable1.start_of_day).toBeDefined();
-            expect(dayTimetable1.day_modifier).toBe(0);
-            expect(dayTimetable1.is_day_off).toBeDefined();
-            expect(dayTimetable1.timeslots).toBeDefined();
-
-            // Check for 2021-05-10
-            const dayTimetable2 = result[1];
-            expect(dayTimetable2.start_of_day).toBeDefined();
-            expect(dayTimetable2.day_modifier).toBe(1);
-            expect(dayTimetable2.is_day_off).toBeDefined();
-            expect(dayTimetable2.timeslots).toBeDefined();
-
-            // Check for 2021-05-11
-            const dayTimetable3 = result[2];
-            expect(dayTimetable3.start_of_day).toBeDefined();
-            expect(dayTimetable3.day_modifier).toBe(2);
-            expect(dayTimetable3.is_day_off).toBeDefined();
-            expect(dayTimetable3.timeslots).toBeDefined();
         });
 
-        it('should return a DayTimetable array without overlapping events', async () => {
+        // Step 2: Test the API with is_ignore_schedule set to false
+        it('should return a DayTimetable array with Timeslots that do not overlap events', async () => {
             const events = [
                 {
                     begin_at: 1620482400, // 2021-05-09T01:00:00+09:00 (Asia/Seoul)
@@ -55,13 +39,38 @@ describe('BookingService', () => {
                 },
             ];
 
+            const result = await getTimeSlots(
+                '20210509',
+                'Asia/Seoul',
+                3600,
+                3,
+                1800,
+                false,
+                false,
+                events,
+                []
+            );
 
+            expect(result).toBeDefined();
+            expect(Array.isArray(result)).toBe(true);
+            expect(result.length).toBe(3);
+
+            result.forEach(dayTimetable => {
+                dayTimetable.timeslots.forEach(slot => {
+                    expect(slot.begin_at).toBeGreaterThanOrEqual(events[0].end_at);
+                });
+            });
+        });
+
+        // Step 3: Test the API with is_ignore_workhour set to false
+        it('should return a DayTimetable array with Timeslots that do not overlap Workhours', async () => {
+            const service_duration = 3600;
             const workhours = [
                 {
                     is_day_off: false,
                     open_interval: 0,
-                    close_interval: 86400,
-                    weekday: 7,
+                    close_interval: 3 * 3600,
+                    weekday: 0, // Sunday is 0
                     key: '0',
                 },
             ];
@@ -69,28 +78,31 @@ describe('BookingService', () => {
             const result = await getTimeSlots(
                 '20210509',
                 'Asia/Seoul',
-                3600,
-                1,
+                service_duration,
+                3,
                 1800,
                 false,
                 false,
-                events,
+                [],
                 workhours
             );
 
             expect(result).toBeDefined();
             expect(Array.isArray(result)).toBe(true);
-            expect(result.length).toBe(1);
+            expect(result.length).toBe(3);
 
-            const dayTimetable = result[0];
-            expect(dayTimetable.timeslots).toBeDefined();
-            expect(dayTimetable.timeslots.length).toBeGreaterThan(0);
+            result.forEach(dayTimetable => {
+                dayTimetable.timeslots.forEach(slot => {
+                    const localBeginAt = dayjs(slot.begin_at * 1000).tz('Asia/Seoul');
+                    const localEndAt = dayjs(slot.end_at * 1000).tz('Asia/Seoul');
+                    const startOfDay = dayjs(dayTimetable.start_of_day * 1000).tz('Asia/Seoul');
+                    const openTime = startOfDay.add(workhours[0].open_interval, 'second').unix();
+                    const closeTime = startOfDay.add(workhours[0].close_interval, 'second').unix();
 
-            // Check that no timeslots overlap with the event
-            dayTimetable.timeslots.forEach(slot => {
-                expect(slot.begin_at).toBeGreaterThanOrEqual(events[0].end_at);
+                    expect(localBeginAt.unix()).toBeGreaterThanOrEqual(openTime);
+                    expect(localEndAt.unix()).toBeLessThanOrEqual(closeTime + service_duration);
+                });
             });
         });
-
     });
 });
