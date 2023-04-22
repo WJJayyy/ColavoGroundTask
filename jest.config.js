@@ -1,9 +1,15 @@
 module.exports = {
+  roots: ['<rootDir>/colavo/src'],
+  testMatch: [
+    '**/__tests__/**/*.+(ts|tsx|js)',
+    '**/?(*.)+(spec|test).+(ts|tsx|js)',
+  ],
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': 'ts-jest',
   },
-  testMatch: ['**/src/**/*.test.(ts|js)'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  collectCoverage: true,
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/colavo/src/$1',
+  },
+  testEnvironment: 'node',
+  transformIgnorePatterns: ['node_modules/(?!(dayjs)/)'],
 };

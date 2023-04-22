@@ -1,7 +1,5 @@
 import { DayTimetable, Timeslot } from './booking.models';
 import * as moment from 'moment-timezone';
-import * as events from '../../events.json';
-import * as workhours from '../../workhours.json';
 import dayjs from 'dayjs';
 
 export type Events = Event[];
@@ -19,7 +17,6 @@ export interface Workhour {
     open_interval: number;
     close_interval: number;
     weekday: number;
-    key: string;
 }
 
 export async function getTimeSlots(
@@ -58,31 +55,37 @@ export async function getTimeSlots(
         const close_interval = is_ignore_workhour ? 86400 : workhour?.close_interval ?? 86400;
 
         const timeslots: Timeslot[] = [];
-        for (
-            let slot_start = start_of_day + open_interval;
-            slot_start + service_duration <= start_of_day + close_interval;
-            slot_start += timeslot_interval
-        ) {
+
+        const openTime = currentDay.clone().startOf('day').add(open_interval, 'second').unix(); // 추가된 부분
+        const closeTime = currentDay.clone().startOf('day').add(close_interval, 'second').unix(); // 추가된 부분
+
+        for (let slot_start = openTime; slot_start + service_duration <= closeTime;) { // 수정된 부분
             const slot_end = slot_start + service_duration;
 
-            const local_slot_start = moment.tz(slot_start * 1000, timezone_identifier).unix();
-            const local_slot_end = moment.tz(slot_end * 1000, timezone_identifier).unix();
-
+            const local_slot_start = dayjs.unix(slot_start).tz(timezone_identifier);
+            const local_slot_end = dayjs.unix(slot_end).tz(timezone_identifier);
 
             const overlappingEvent = events.find(
-                event => event.begin_at < local_slot_end && event.end_at > slot_start
+                event => event.begin_at < local_slot_end.unix() && event.end_at > local_slot_start.unix()
             );
 
             if (!is_ignore_schedule && overlappingEvent) {
+                slot_start += timeslot_interval;
+                continue;
+            }
+
+            if (local_slot_start.unix() < openTime || local_slot_end.unix() > closeTime) {
+                slot_start += timeslot_interval;
                 continue;
             }
 
             timeslots.push({
-                begin_at: local_slot_start,
-                end_at: local_slot_end,
+                begin_at: local_slot_start.unix(),
+                end_at: local_slot_end.unix(),
             });
-        }
 
+            slot_start += timeslot_interval;
+        }
 
         dayTimetables.push({
             start_of_day,
@@ -94,4 +97,5 @@ export async function getTimeSlots(
 
     return dayTimetables;
 }
+
 

@@ -2,7 +2,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && pm2 start dist/server.js --time --restart-delay=5000 --name 'colavo-api-dev' --watch",
-    "test": "jest",
+    "test": "jest --coverage",
     "start:dev": "nodemon -e ts -w colavo/src -x \"ts-node --transpile-only colavo/src/app.ts\""
   },
   "devDependencies": {

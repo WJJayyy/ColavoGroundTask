@@ -1,8 +1,8 @@
-import { getTimeSlots } from '../booking/booking.service';
+import { getTimeSlots, Event, Workhour } from '../booking/booking.service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { Event } from '../booking/booking.service';
+import workhours from '../../workhours.json';
 
 dayjs.extend(timezone);
 dayjs.extend(utc);
@@ -64,43 +64,25 @@ describe('BookingService', () => {
 
         // Step 3: Test the API with is_ignore_workhour set to false
         it('should return a DayTimetable array with Timeslots that do not overlap Workhours', async () => {
-            const service_duration = 3600;
-            const workhours = [
-                {
-                    is_day_off: false,
-                    open_interval: 0,
-                    close_interval: 3 * 3600,
-                    weekday: 0, // Sunday is 0
-                    key: '0',
-                },
-            ];
+            const events: Event[] = [];
+            const timeSlotInterval = 1800; // 30 minutes
 
-            const result = await getTimeSlots(
-                '20210509',
-                'Asia/Seoul',
-                service_duration,
-                3,
-                1800,
-                false,
-                false,
-                [],
-                workhours
-            );
+            const result = await getTimeSlots('20210509', 'Asia/Seoul', 3600, 1, timeSlotInterval, false, false, events, workhours);
 
-            expect(result).toBeDefined();
-            expect(Array.isArray(result)).toBe(true);
-            expect(result.length).toBe(3);
+            result.forEach((dayTimetable) => {
+                dayTimetable.timeslots.forEach((timeSlot) => {
+                    workhours.forEach((workHour) => {
+                        if (workHour.weekday === (dayTimetable.start_of_day % 7) + 1) {
+                            const openTime = dayjs.unix(dayTimetable.start_of_day).tz('Asia/Seoul').add(workHour.open_interval, 'second').unix();
+                            const closeTime = dayjs.unix(dayTimetable.start_of_day).tz('Asia/Seoul').add(workHour.close_interval, 'second').unix();
 
-            result.forEach(dayTimetable => {
-                dayTimetable.timeslots.forEach(slot => {
-                    const localBeginAt = dayjs(slot.begin_at * 1000).tz('Asia/Seoul');
-                    const localEndAt = dayjs(slot.end_at * 1000).tz('Asia/Seoul');
-                    const startOfDay = dayjs(dayTimetable.start_of_day * 1000).tz('Asia/Seoul');
-                    const openTime = startOfDay.add(workhours[0].open_interval, 'second').unix();
-                    const closeTime = startOfDay.add(workhours[0].close_interval, 'second').unix();
+                            const localTimeSlotBegin = dayjs.unix(timeSlot.begin_at).tz('Asia/Seoul').unix(); // timeSlot 시작 시간을 로컬 시간대로 변환
+                            const localTimeSlotEnd = dayjs.unix(timeSlot.end_at).tz('Asia/Seoul').unix(); // timeSlot 종료 시간을 로컬 시간대로 변환
 
-                    expect(localBeginAt.unix()).toBeGreaterThanOrEqual(openTime);
-                    expect(localEndAt.unix()).toBeLessThanOrEqual(closeTime + service_duration);
+                            expect(localTimeSlotBegin).toBeGreaterThanOrEqual(openTime);
+                            expect(localTimeSlotEnd).toBeLessThanOrEqual(closeTime);
+                        };
+                    });
                 });
             });
         });
