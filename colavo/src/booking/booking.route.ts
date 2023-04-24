@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getTimeSlots } from './booking.service';
+import { getTimeSlots, Event, Workhour } from './booking.service';
 import events from '../../events.json';
 import workhours from '../../workhours.json';
 
@@ -7,7 +7,6 @@ const router = express.Router();
 
 router.post('/getTimeSlots', async (req: Request, res: Response) => {
     console.log(req.body);
-    console.log('Request received at /getTimeSlots');
     const {
         start_day_identifier,
         timezone_identifier,
@@ -27,8 +26,8 @@ router.post('/getTimeSlots', async (req: Request, res: Response) => {
             timeslot_interval,
             is_ignore_schedule,
             is_ignore_workhour,
-            events as any,
-            workhours as any
+            events as Event[],
+            workhours as Workhour[]
         );
         res.json(result);
     } catch (err: unknown) {

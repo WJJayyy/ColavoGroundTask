@@ -26,7 +26,6 @@ export async function getTimeSlots(req: Request, res: Response): Promise<void> {
             events,
             workhours
         );
-
         res.status(200).json(result);
     } catch (err) {
         if (err instanceof Error) {

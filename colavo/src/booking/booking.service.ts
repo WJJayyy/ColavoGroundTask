@@ -33,12 +33,12 @@ export async function getTimeSlots(
     const startDay = dayjs.tz(start_day_identifier, "YYYYMMDD", timezone_identifier);
     const dayTimetables: DayTimetable[] = [];
 
-    for (let i = 0; i < days; i++) {
+    for (let i = -1; i < days - 1; i++) {
         const currentDay = startDay.clone().add(i, 'days');
         const start_of_day = currentDay.clone().startOf('day').unix();
         const day_modifier = i;
 
-        const weekday = currentDay.day() === 0 ? 6 : currentDay.day() - 1;
+        const weekday = currentDay.day() === 0 ? 1 : currentDay.day() + 1;
         const workhour = workhours.find(wh => wh.weekday === weekday);
 
         if (!is_ignore_workhour && workhour?.is_day_off) {
