@@ -70,7 +70,17 @@ describe('BookingService', () => {
             const events: Event[] = [];
             const timeSlotInterval = 1800; // 30 minutes
 
-            const result = await getTimeSlots('20210509', 'Asia/Seoul', 3600, 1, timeSlotInterval, false, false, events, workhours);
+            const result = await getTimeSlots(
+                '20210509',
+                'Asia/Seoul',
+                3600,
+                1,
+                timeSlotInterval,
+                false,
+                false,
+                events,
+                workhours
+            );
 
             result.forEach((dayTimetable) => {
                 dayTimetable.timeslots.forEach((timeSlot) => {

@@ -1,5 +1,4 @@
 import { DayTimetable, Timeslot } from './booking.models';
-import * as moment from 'moment-timezone';
 import dayjs from 'dayjs';
 
 export type Events = Event[];
@@ -51,15 +50,15 @@ export async function getTimeSlots(
             continue;
         }
 
-        const open_interval = is_ignore_workhour ? 0 : workhour?.open_interval ?? 0;
+        const open_interval = is_ignore_workhour ? 0 : workhour?.open_interval ?? 0; //근무 시작시간
         const close_interval = is_ignore_workhour ? 86400 : workhour?.close_interval ?? 86400;
 
         const timeslots: Timeslot[] = [];
 
-        const openTime = currentDay.clone().startOf('day').add(open_interval, 'second').unix(); // 추가된 부분
-        const closeTime = currentDay.clone().startOf('day').add(close_interval, 'second').unix(); // 추가된 부분
+        const openTime = currentDay.clone().startOf('day').add(open_interval, 'second').unix(); // 작업시작시간(해당날짜의 시작시간 + 근무시작시간)
+        const closeTime = currentDay.clone().startOf('day').add(close_interval, 'second').unix();
 
-        for (let slot_start = openTime; slot_start + service_duration <= closeTime;) { // 수정된 부분
+        for (let slot_start = openTime; slot_start + service_duration <= closeTime;) { // 예약시작시간
             const slot_end = slot_start + service_duration;
 
             const local_slot_start = dayjs.unix(slot_start).tz(timezone_identifier);
@@ -67,12 +66,12 @@ export async function getTimeSlots(
 
             const overlappingEvent = events.find(
                 event => event.begin_at < local_slot_end.unix() && event.end_at > local_slot_start.unix()
-            );
+            ); // 현재 예약 시간대와 겹치는 이벤트를 찾습니다.
 
             if (!is_ignore_schedule && overlappingEvent) {
                 slot_start += timeslot_interval;
                 continue;
-            }
+            } // 겹치는 이벤트를 찾습니다.
 
             if (local_slot_start.unix() < openTime || local_slot_end.unix() > closeTime) {
                 slot_start += timeslot_interval;
